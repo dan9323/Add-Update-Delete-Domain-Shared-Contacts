@@ -1,0 +1,125 @@
+var SPREADSHEET_ID=SpreadsheetApp.getActiveSpreadsheet().getId();
+var DOMAIN = Session.getEffectiveUser().getEmail().split("@")[1];
+var SHEET_NAME = 'ADD_BATCH_SHARED_CONTACTS';
+var ERROR_RECIPIENT_MAIL= Session.getEffectiveUser().getEmail();
+var HIGHEST_BOUNDARY,LOWEST_BOUNDARY,ERROR_COUNT='';
+
+function onInstall(e) {
+  onOpen(e);
+}
+
+function onOpen(e) {
+  SpreadsheetApp.getUi()
+      .createAddonMenu()
+      .addItem('Upload Contacts', 'getContacts')
+      .addToUi();
+}
+
+function getContacts(){
+  var maxRows =  SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getLastRow();
+  if (maxRows<=1) {
+    Logger.log("NO DATA TO PROCESS.");
+  }
+  else{
+    if (maxRows<=101){
+      HIGHEST_BOUNDARY=maxRows;
+      LOWEST_BOUNDARY=2;
+      var range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(2, 1, maxRows*1-1, 12).getValues();
+      for (var i=0;i<range.length;i++){
+        addContact(range[i][0],
+               range[i][1],
+               range[i][2],
+               range[i][3],
+               range[i][4],
+               range[i][5],
+               range[i][6],
+               range[i][7],
+               range[i][8],
+               range[i][9],
+               range[i][10],
+               range[i][11],
+               i*1+2);
+      }
+    }
+      else{
+        HIGHEST_BOUNDARY=101;
+        LOWEST_BOUNDARY=2;
+        var range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(2, 1, maxRows*1-1, 12).getValues();
+        for (var i=0;i<99;i++){
+          addContact(range[i][0],
+               range[i][1],
+               range[i][2],
+               range[i][3],
+               range[i][4],
+               range[i][5],
+               range[i][6],
+               range[i][7],
+               range[i][8],
+               range[i][9],
+               range[i][10],
+               range[i][11],
+               i*1+2);
+        
+      }
+    }
+  }
+  
+  if (ERROR_COUNT=='' && maxRows>1){
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).deleteRows(LOWEST_BOUNDARY, HIGHEST_BOUNDARY*1-1);
+  }
+  else{
+    MailApp.sendEmail(ERROR_RECIPIENT_MAIL, 'ERROR IN ADDING DOMAIN SHARED CONTACTS', 'There was an error in adding some rows. Please check the sheet.');
+    
+  }
+}
+
+
+function addContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,primaryPhone,secondaryPhone,city,street,region,postcode,country,rowNumber) {
+  
+  var contacts = ContactsApp.getContacts();
+  
+  var buildXML = "<atom:entry xmlns:atom='http://www.w3.org/2005/Atom' xmlns:gd='http://schemas.google.com/g/2005'>"+
+                 "<atom:category scheme='http://schemas.google.com/g/2005#kind'    term='http://schemas.google.com/contact/2008#contact' />"+
+	             "<gd:name>"+
+		              "<gd:givenName>"+firstName+"</gd:givenName>"+
+		              "<gd:familyName>"+lastName+"</gd:familyName>"+
+		               "<gd:fullName>"+fullName+"</gd:fullName>"+
+	             "</gd:name>"+
+	"<atom:content type='text'>Notes</atom:content>"+
+	"<gd:email rel='http://schemas.google.com/g/2005#work'    primary='true'    address='"+primaryEmail+"' displayName='"+firstName+" "+lastName+"' />"+
+    "<gd:email rel='http://schemas.google.com/g/2005#home'    address='"+secondaryEmail+"' />"+
+	"<gd:phoneNumber rel='http://schemas.google.com/g/2005#work'    primary='true'>"+primaryPhone+"</gd:phoneNumber>"+
+	"<gd:phoneNumber rel='http://schemas.google.com/g/2005#home'>"+secondaryPhone+"</gd:phoneNumber>"+
+	"<gd:im address='"+primaryEmail+"'    protocol='http://schemas.google.com/g/2005#GOOGLE_TALK'    primary='true'    rel='http://schemas.google.com/g/2005#home' />"+
+	"<gd:structuredPostalAddress      rel='http://schemas.google.com/g/2005#work'      primary='true'>"+
+		"<gd:city>"+city+"</gd:city>"+
+		"<gd:street>"+street+"</gd:street>"+
+		"<gd:region>"+region+"</gd:region>"+
+		"<gd:postcode>"+postcode+"</gd:postcode>"+
+		"<gd:country>"+country+"</gd:country>"+
+		"<gd:formattedAddress>"+street+" "+city+"</gd:formattedAddress>"+
+	"</gd:structuredPostalAddress>"+
+    "</atom:entry>";
+  
+  var params = {
+    method      : "post",
+    contentType : "application/atom+xml",
+    headers     : {"Authorization": "Bearer " + ScriptApp.getOAuthToken(),"GData-Version": "3.0"},
+    payload: buildXML,
+    muteHttpExceptions  : true
+  };
+  
+  var resp = UrlFetchApp.fetch("https://www.google.com/m8/feeds/contacts/"+DOMAIN+"/full", params);
+  
+  var respCode=resp.getResponseCode();
+  
+  Logger.log(respCode);
+  
+  if (respCode=='201' || respCode=='200') {
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 13, 1, 1).setValue('OK');
+  }
+  else{
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 13, 1, 1).setValue('ERROR');
+    ERROR_COUNT=ERROR_COUNT.toString()+rowNumber;
+  }
+}
