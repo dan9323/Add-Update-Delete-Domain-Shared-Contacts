@@ -4,8 +4,8 @@ Add Update Delete and Sync Domain Shared Contacts
 This script will add, update, delete and sync domain shared contacts through batches of data directly into your domain.
 
 In order to use this addon, you will have to perform the following:
-* Create a sheet with the name EXACTLY like this – “SHARED_CONTACTS”
-* Append the following values in the top cells (from A1 to M1):
+1) Create a sheet with the name EXACTLY like this – “SHARED_CONTACTS”
+2)Append the following values in the top cells (from A1 to M1):
 - First Name
 - Last Name
 - Full Name
