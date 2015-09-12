@@ -73,6 +73,14 @@ function syncContacts(){
 
 
 function addContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,primaryPhone,secondaryPhone,city,street,region,postcode,country,rowNumber) {
+  if (secondaryEmail =='' || secondaryEmail == undefined || secondaryEmail==null) secondaryEmail='--';
+  if (primaryPhone =='' || primaryPhone == undefined || primaryPhone==null) primaryPhone='--';
+  if (secondaryPhone =='' || secondaryPhone == secondaryPhone || secondaryPhone==null) secondaryPhone='--';
+  if (city =='' || city == undefined || city==null) city='--';
+  if (street =='' || street == undefined || street==null) street='--';
+  if (region =='' || region == undefined || region==null) region='--';
+  if (postcode =='' || postcode == undefined || postcode==null) postcode='--';
+  if (country =='' || country == undefined || country==null) country='--';
   
   var buildXML = "<atom:entry xmlns:atom='http://www.w3.org/2005/Atom' xmlns:gd='http://schemas.google.com/g/2005'>"+
                  "<atom:category scheme='http://schemas.google.com/g/2005#kind'    term='http://schemas.google.com/contact/2008#contact' />"+
@@ -209,6 +217,14 @@ function getAllContacts(){
 }
 
 function updateContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,primaryPhone,secondaryPhone,city,street,region,postcode,country,contactID,rowNumber) {
+  if (secondaryEmail =='' || secondaryEmail == undefined || secondaryEmail==null) secondaryEmail='--';
+  if (primaryPhone =='' || primaryPhone == undefined || primaryPhone==null) primaryPhone='--';
+  if (secondaryPhone =='' || secondaryPhone == secondaryPhone || secondaryPhone==null) secondaryPhone='--';
+  if (city =='' || city == undefined || city==null) city='--';
+  if (street =='' || street == undefined || street==null) street='--';
+  if (region =='' || region == undefined || region==null) region='--';
+  if (postcode =='' || postcode == undefined || postcode==null) postcode='--';
+  if (country =='' || country == undefined || country==null) country='--';
   
   var buildXML = "<atom:entry xmlns:atom='http://www.w3.org/2005/Atom' xmlns:gd='http://schemas.google.com/g/2005'>"+
                  "<atom:category scheme='http://schemas.google.com/g/2005#kind'    term='http://schemas.google.com/contact/2008#contact' />"+
