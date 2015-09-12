@@ -1,4 +1,4 @@
-# Add-Domain-Shared-Contacts
+# Add-Update-Delete-Domain-Shared-Contacts
 Add Update Delete and Sync Domain Shared Contacts
 
 This script will add, update, delete and sync domain shared contacts through batches of data directly into your domain.
