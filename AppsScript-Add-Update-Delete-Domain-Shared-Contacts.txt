@@ -18,51 +18,36 @@ function onOpen(e){
 
 function syncContacts(){
   var maxRows =  SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getLastRow();
+  SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('LOGS').appendRow([new Date(),maxRows]);
   if (maxRows<=2) {
     Logger.log("NO DATA TO PROCESS.");
   }
   else{
-    if (maxRows<=102){
-      HIGHEST_BOUNDARY=maxRows;
-      LOWEST_BOUNDARY=3;
-      var range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(3, 1, maxRows*1-2, 15).getValues();
-      for (var i=0;i<range.length;i++){
-        switch (range[i][13]){
-          case 'ADD':
-            addContact(range[i][0],range[i][1],range[i][2],range[i][3],range[i][4],range[i][5],range[i][6],range[i][7],range[i][8],range[i][9],range[i][10],range[i][11],i*1+3);
+    var i=3;
+    var range;
+    range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(i, 1, 1, 15).getValues();
+	while (i<=maxRows) {
+		switch(range[0][13]){
+		  case 'ADD':
+            addContact(range[0][0],range[0][1],range[0][2],range[0][3],range[0][4],range[0][5],range[0][6],range[0][7],range[0][8],range[0][9],range[0][10],range[0][11],i);
             break;
           case 'UPDATE':
-            updateContact(range[i][0],range[i][1],range[i][2],range[i][3],range[i][4],range[i][5],range[i][6],range[i][7],range[i][8],range[i][9],range[i][10],range[i][11],range[i][12],i*1+3);
+            updateContact(range[0][0],range[0][1],range[0][2],range[0][3],range[0][4],range[0][5],range[0][6],range[0][7],range[0][8],range[0][9],range[0][10],range[0][11],range[0][12],i);
             break;
           case 'DELETE':
-            deleteContact(range[i][12],i*1+3);
+            deleteContact(range[0][12],i*1+3);
             break;
         }
-            
-      }
+		i++;
+		range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(i, 1, 1, 15).getValues();
+		}
+      SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName('LOGS').appendRow([new Date(),'i='+i]);
     }
-      else{
-        HIGHEST_BOUNDARY=102;
-        LOWEST_BOUNDARY=3;
-        var range = SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(3, 1, maxRows*1-2, 15).getValues();
-        for (var i=0;i<99;i++){
-          switch (range[i][13]){
-          case 'ADD':
-            addContact(range[i][0],range[i][1],range[i][2],range[i][3],range[i][4],range[i][5],range[i][6],range[i][7],range[i][8],range[i][9],range[i][10],range[i][11],i*1+3);
-            break;
-          case 'UPDATE':
-            updateContact(range[i][0],range[i][1],range[i][2],range[i][3],range[i][4],range[i][5],range[i][6],range[i][7],range[i][8],range[i][9],range[i][10],range[i][11],range[i][12],i*1+3);
-            break;
-          case 'DELETE':
-            deleteContact(range[i][12],i*1+3);
-            break;
-        }
-        
-      }
-    }
-  }
+  
   
   if (ERROR_COUNT==''){
+    Utilities.sleep(1000);
+    getAllContacts();
     SpreadsheetApp.getActiveSpreadsheet().toast('All operations have been successful.');
   }
   else{
@@ -73,6 +58,7 @@ function syncContacts(){
 
 
 function addContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,primaryPhone,secondaryPhone,city,street,region,postcode,country,rowNumber) {
+  
   if (secondaryEmail =='' || secondaryEmail == undefined || secondaryEmail==null) secondaryEmail='--';
   if (primaryPhone =='' || primaryPhone == undefined || primaryPhone==null) primaryPhone='--';
   if (secondaryPhone =='' || secondaryPhone == secondaryPhone || secondaryPhone==null) secondaryPhone='--';
@@ -121,6 +107,7 @@ function addContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,prim
   
   if (respCode=='201' || respCode=='200') {
     SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 15, 1, 1).setValue('OK');
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 14, 1, 1).clear();
   }
   else{
     SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 15, 1, 1).setValue('ERROR');
@@ -217,6 +204,7 @@ function getAllContacts(){
 }
 
 function updateContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,primaryPhone,secondaryPhone,city,street,region,postcode,country,contactID,rowNumber) {
+  
   if (secondaryEmail =='' || secondaryEmail == undefined || secondaryEmail==null) secondaryEmail='--';
   if (primaryPhone =='' || primaryPhone == undefined || primaryPhone==null) primaryPhone='--';
   if (secondaryPhone =='' || secondaryPhone == secondaryPhone || secondaryPhone==null) secondaryPhone='--';
@@ -266,6 +254,7 @@ function updateContact(firstName,lastName,fullName,primaryEmail,secondaryEmail,p
   
   if (respCode=='201' || respCode=='200') {
     SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 15, 1, 1).setValue('OK');
+    SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 14, 1, 1).clear();
   }
   else{
     SpreadsheetApp.openById(SPREADSHEET_ID).getSheetByName(SHEET_NAME).getRange(rowNumber*1, 15, 1, 1).setValue('ERROR');
